@@ -11,8 +11,11 @@ export SWARM_HOME="${SWARM_HOME:-$HOME/swarm-workers}"
 mkdir -p "$SWARM_HOME/logs"
 HOST="$(hostname -s 2>/dev/null | tr -cd 'a-zA-Z0-9' | cut -c1-10)"
 MATCH=(); [ "$DIR" != "any" ] && MATCH=(--match "($DIR)")
-for i in $(seq 1 "$N"); do
-  NAME="${HOST}-${DIR}${i}"
+started=0; i=0
+while [ "$started" -lt "$N" ]; do
+  i=$((i+1)); NAME="${HOST}-${DIR}${i}"
+  pgrep -f "work --name $NAME " >/dev/null && continue      # name already running on this laptop
+  started=$((started+1))
   nohup "$PWD/.venv/bin/python" swarm.py work --name "$NAME" --problem p4 "${MATCH[@]+"${MATCH[@]}"}" \
         > "$SWARM_HOME/logs/$NAME.log" 2>&1 &
   echo "started $NAME  (log: $SWARM_HOME/logs/$NAME.log)"
