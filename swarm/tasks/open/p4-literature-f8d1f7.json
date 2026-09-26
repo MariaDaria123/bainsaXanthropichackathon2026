@@ -8,6 +8,5 @@
  "parent": null,
  "created_by": "human",
  "created": "2026-09-26T14:45:17",
- "owner": "vm-any1",
- "claimed_at": "2026-09-26T14:59:19"
+ "note": "requeued: cloud workers have no web access; laptops take literature tasks"
 }
