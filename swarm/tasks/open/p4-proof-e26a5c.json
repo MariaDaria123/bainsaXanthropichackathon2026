@@ -1,0 +1,11 @@
+{
+ "id": "p4-proof-e26a5c",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "proof",
+ "goal": "(b) Write a COMPLETE proof of gcd(m_i,m_j) >= k*exp(-(2+o(1))*sqrt(log k/log log k)) (adapting Fornal-Sun, every step checked and expanded), or the strongest clean special case you can finish.",
+ "prio": 2,
+ "parent": null,
+ "created_by": "human",
+ "created": "2026-09-26T14:45:17"
+}

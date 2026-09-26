@@ -1,0 +1,11 @@
+{
+ "id": "p4-proof-f69ad5",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "proof",
+ "goal": "(b) Prove gcd(m_i,m_j) >= c*k with an explicit absolute c for a natural special class: all moduli squarefree, or every modulus with at most two prime factors. Full proof; state the class exactly.",
+ "prio": 2,
+ "parent": null,
+ "created_by": "human",
+ "created": "2026-09-26T14:45:17"
+}

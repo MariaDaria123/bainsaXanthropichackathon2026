@@ -1,0 +1,11 @@
+{
+ "id": "p4-literature-0afc53",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "literature",
+ "goal": "(b) Read Fornal-Sun, arXiv 2607.24655 (July 2026) in full. Extract every lemma with exact hypotheses, check each step, and write the complete proof skeleton; flag any gap precisely.",
+ "prio": 1,
+ "parent": null,
+ "created_by": "human",
+ "created": "2026-09-26T14:45:17"
+}

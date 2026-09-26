@@ -1,0 +1,11 @@
+{
+ "id": "p4-obstruction-324244",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "obstruction",
+ "goal": "(b) Locate exactly where the sieve / Rankin-trick step loses the exp factor. Either improve the constant 2, or explain precisely why this method cannot give gcd >= c*k (quantitative barrier or explicit example).",
+ "prio": 2,
+ "parent": null,
+ "created_by": "human",
+ "created": "2026-09-26T14:45:17"
+}

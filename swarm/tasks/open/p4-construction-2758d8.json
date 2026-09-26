@@ -1,0 +1,11 @@
+{
+ "id": "p4-construction-2758d8",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "construction",
+ "goal": "(a) Hunt for counterexamples at k=25..30 (pairwise disjoint, all pairwise gcd <= k-1) by heuristic, SAT or CP-SAT search over moduli dividing lcm(1..k-1). Verify any hit with problems/p4/lib/congruence.check_family. Report the best near-miss (largest disjoint family with max gcd <= k-1).",
+ "prio": 2,
+ "parent": null,
+ "created_by": "human",
+ "created": "2026-09-26T14:45:17"
+}
