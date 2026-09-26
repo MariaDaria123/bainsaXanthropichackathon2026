@@ -1,5 +1,5 @@
 # Swarm log: p4
-_generated 2026-09-26T15:29 by tools/swarm_report.py; see SWARM_CONTEXT.md for how to read it_
+_generated 2026-09-26T15:34 by tools/swarm_report.py; see SWARM_CONTEXT.md for how to read it_
 
 ## Summary
 - **Tasks:** 3 done, 4 running, 14 open (9 spawned by agents)
