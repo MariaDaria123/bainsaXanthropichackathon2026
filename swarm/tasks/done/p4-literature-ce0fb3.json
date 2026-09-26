@@ -10,5 +10,15 @@
  "created": "2026-09-26T14:45:17",
  "note": "requeued: cloud workers have no web access; laptops take literature tasks",
  "owner": "IusesMacBo-a1",
- "claimed_at": "2026-09-26T15:12:09"
+ "claimed_at": "2026-09-26T15:12:09",
+ "finished_at": "2026-09-26T15:23:42",
+ "seconds": 690,
+ "ok": true,
+ "n_findings": 9,
+ "spawned": [
+  "p4-proof-9f5f3f",
+  "p4-certificate-3ea465",
+  "p4-literature-86341a"
+ ],
+ "critics": "MINOR/MINOR (round 2)"
 }

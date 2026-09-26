@@ -1,0 +1,11 @@
+{
+ "id": "p4-literature-86341a",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "literature",
+ "goal": "(a) Locate and check a proof of the group form for k=5 (cell claims known) and test whether O'Bryant's items 1-5 transfer to cosets (index-reduction replaces m_i/p by a supergroup of index n_i/p only when one exists).",
+ "prio": 3,
+ "parent": "p4-literature-ce0fb3",
+ "created_by": "IusesMacBo-a1",
+ "created": "2026-09-26T15:23:42"
+}

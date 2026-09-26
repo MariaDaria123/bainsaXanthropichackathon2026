@@ -1,0 +1,11 @@
+{
+ "id": "p4-certificate-3ea465",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "certificate",
+ "goal": "(a) Write a certified (tools/cert.py, <10 min) search for k=21,22,23 using constraints C1-C7 (moduli divisors of lcm(1..k-1) with >=2 prime factors, no prime in all moduli, >=3 multiples of k-1, primes >=k/2 in exactly 0 or 2 moduli, subfamily density test); success makes k=24 decided.",
+ "prio": 1,
+ "parent": "p4-literature-ce0fb3",
+ "created_by": "IusesMacBo-a1",
+ "created": "2026-09-26T15:23:42"
+}
