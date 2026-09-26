@@ -1,0 +1,11 @@
+{
+ "id": "p4-certificate-6d543a",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "certificate",
+ "goal": "(a) Using the Main Reduction Theorem's finite domain (moduli restricted to the 1920 divisors of L=lcm(1..24)) plus Lemma 3's per-prime pruning rules, build an actual exhaustiveness certificate (tools/cert.py) that attempts to decide k=25 by exhaustive search, reporting node counts and either a size-25 counterexample or a proof none exists with these moduli.",
+ "prio": 1,
+ "parent": "p4-proof-9c5676",
+ "created_by": "cloud-1",
+ "created": "2026-09-26T15:24:34"
+}

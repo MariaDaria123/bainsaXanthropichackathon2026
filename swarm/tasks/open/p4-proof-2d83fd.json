@@ -1,0 +1,11 @@
+{
+ "id": "p4-proof-2d83fd",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "proof",
+ "goal": "(a) Extend Lemma 3's density/injectivity argument to primes p in (k/3,k/2], e.g. p in {9,11} for k=25 (where gcd could be p or 2p, needing a size-2 case split instead of forcing t=1), to squeeze the reduced search domain further before any exhaustive search is attempted.",
+ "prio": 1,
+ "parent": "p4-proof-9c5676",
+ "created_by": "cloud-1",
+ "created": "2026-09-26T15:24:34"
+}
