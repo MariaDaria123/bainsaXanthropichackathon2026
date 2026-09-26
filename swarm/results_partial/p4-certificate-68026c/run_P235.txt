@@ -1,0 +1,1 @@
+{"certified_sizes": [25], "nodes": {"25": 3987911}, "total_wall_s": 391.03}

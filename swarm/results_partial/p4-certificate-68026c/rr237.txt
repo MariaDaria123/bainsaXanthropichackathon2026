@@ -1,0 +1,2 @@
+P237 OK 3502201 nodes 525.552 s
+ALL OK

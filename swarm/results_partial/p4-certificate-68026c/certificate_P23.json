@@ -1,0 +1,61 @@
+{
+ "problem": "p4",
+ "cell": "c6a-k25-P23",
+ "domain": "sets of 25 distinct classes (a mod m), m | L=144, m >= 2, 0 <= a < m, pairwise disjoint with pairwise gcd <= 24; primes P=(2, 3)",
+ "domain_proof": "Lemma A (result.md): any counterexample of size 25 reduces to one with every modulus dividing L_all = 16*9*5*7*11*13*17*19*23 with the same pairwise gcds; this branch covers exactly those reduced counterexamples whose moduli use only primes in P.",
+ "rules": [
+  {
+   "id": "R1",
+   "statement": "Canonical order: classes sorted by (m, a); only increasing index sequences enumerated.",
+   "proof": "Disjointness and the gcd condition are symmetric; equal classes are never disjoint (gcd(m,m)=m | 0), so each family is a set and has exactly one increasing listing."
+  },
+  {
+   "id": "R2",
+   "statement": "Translation: the first (smallest in (m,a) order) class has a = 0.",
+   "proof": "Shifting all residues by -a_1 preserves every difference a_i - a_j, so disjointness and gcds are kept; the smallest class (m1,a1) becomes (m1,0), still smallest among classes of modulus m1 since 0 is the least residue, and classes of larger modulus stay larger. So every family has a translate with a_1 = 0."
+  },
+  {
+   "id": "R3",
+   "statement": "Compatibility: a class is added only if it is disjoint from, and has gcd <= 24 with, every chosen class.",
+   "proof": "Both conditions are pairwise and required of every pair in a counterexample."
+  },
+  {
+   "id": "R4",
+   "statement": "Colouring bound: if |chosen| + (number of colours in a greedy proper colouring of the candidate compatibility graph) < 25, prune.",
+   "proof": "Candidates are the classes compatible with all chosen ones and later in order. Any extension adds a clique of the compatibility graph on candidates; a clique meets each colour class (an independent set) at most once."
+  },
+  {
+   "id": "R5",
+   "statement": "Multiplier: the second class (m2, a2) of the family (second in (m, a) order) has a2 = 0 or a2 | m2.",
+   "proof": "The affine maps x -> u x + t (u a unit mod L_P) send classes (m, a) to (m, (u a + t) mod m), keep every modulus, and keep disjointness and gcds, because g | (a_i - a_j) iff g | u (a_i - a_j) for gcd(u, g) = 1. Take the image of a family whose sorted list is lexicographically least. Its first class has a1 = 0 (else translate by -a1: moduli are fixed, so the first class becomes (m1, 0), smaller). Let (m2, a2) be its second class and d = gcd(a2, m2). Units mod L_P surject onto units mod m2, so some unit u has u a2 = d mod m2; x -> u x fixes (m1, 0), which stays first (moduli fixed, 0 least residue), and sends (m2, a2) to (m2, d). Every other class has modulus >= m2, so the new second class is <= (m2, d). If d < a2 this image is smaller, contradiction; hence a2 = d, i.e. a2 | m2 (a2 = 0 is allowed). R2 is the first half of this argument."
+  }
+ ],
+ "sizes": [
+  {
+   "size": 25,
+   "nodes": 2133,
+   "pruned": {
+    "R1": 0,
+    "R2": 388,
+    "R3": 0,
+    "R4": 2113,
+    "R5": 2627
+   },
+   "survivors": [],
+   "finished": true,
+   "wall_s": 0.107,
+   "branch": "P23",
+   "n_classes": 402,
+   "n_survivors": 0,
+   "n_undecided": 0,
+   "certified": true
+  }
+ ],
+ "certified_sizes": [
+  25
+ ],
+ "total_wall_s": 0.126,
+ "script_sha256": "afe181f71b36ba9ac784dbe453d5930b18c539b7da831ea1e95e42d926cfba55",
+ "python": "3.14.6",
+ "platform": "macOS-26.2-arm64-arm-64bit-Mach-O"
+}
