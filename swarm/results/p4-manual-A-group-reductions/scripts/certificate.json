@@ -1,0 +1,53 @@
+{
+ "problem": "p4",
+ "cell": "c6",
+ "domain": "all functions D: {1,...,6} -> {7 nonempty subsets of {2,3,5}}, i.e. 7^6 = 117649 tuples",
+ "domain_proof": "Sub-lemma (result.md): if every pairwise gcd(n_i,n_j) in a k=6 group-form counterexample lies in {2,3,4,5} (forced by Lemma 2 giving gcd>=2 and the counterexample hypothesis giving gcd<=5), then D_i := {p in {2,3,5}: p|n_i} is one of the 7 nonempty subsets of {2,3,5} for every i and |D_i & D_j| = 1 for i != j (any prime >=7 dividing gcd(n_i,n_j) would force that gcd >= 7 > 5, excluded). This is a NECESSARY condition only: D_i forgets exponents, and the exponent layer (Sub-lemma (c) in result.md) is a further necessary condition not encoded in this domain. Hence every D-tuple compatible with a k=6 counterexample lies in this 7^6-element domain, and the domain is exhaustive by construction (every one of the 7 subsets per index is tried, no restriction is assumed in advance).",
+ "rules": [],
+ "sizes": [
+  {
+   "size": 6,
+   "nodes": 117649,
+   "pruned": {},
+   "survivors": [
+    {
+     "object": "((2,), (2,), (2,), (2,), (2,), (2,))",
+     "decision": "classified: one of the 4 shared-prime patterns compatible with a k=6 group-form counterexample's pairwise-gcd constraints (realizability by an actual group is NOT decided by this search - see result.md)",
+     "minimal_part": "((2,), (2,), (2,), (2,), (2,), (2,))",
+     "minimality_proof": "The D-tuple itself is the object being classified; each of the 6 entries and all 15 pairwise intersections are needed to state |D_i cap D_j|=1 for every pair, so no proper sub-tuple determines membership in this pattern."
+    },
+    {
+     "object": "((2,), (2,), (2,), (2,), (2,), (2, 3))",
+     "decision": "classified: one of the 4 shared-prime patterns compatible with a k=6 group-form counterexample's pairwise-gcd constraints (realizability by an actual group is NOT decided by this search - see result.md)",
+     "minimal_part": "((2,), (2,), (2,), (2,), (2,), (2, 3))",
+     "minimality_proof": "The D-tuple itself is the object being classified; each of the 6 entries and all 15 pairwise intersections are needed to state |D_i cap D_j|=1 for every pair, so no proper sub-tuple determines membership in this pattern."
+    },
+    {
+     "object": "((2,), (2,), (2,), (2,), (2,), (2, 3, 5))",
+     "decision": "classified: one of the 4 shared-prime patterns compatible with a k=6 group-form counterexample's pairwise-gcd constraints (realizability by an actual group is NOT decided by this search - see result.md)",
+     "minimal_part": "((2,), (2,), (2,), (2,), (2,), (2, 3, 5))",
+     "minimality_proof": "The D-tuple itself is the object being classified; each of the 6 entries and all 15 pairwise intersections are needed to state |D_i cap D_j|=1 for every pair, so no proper sub-tuple determines membership in this pattern."
+    },
+    {
+     "object": "((2,), (2,), (2,), (2,), (2, 3), (2, 5))",
+     "decision": "classified: one of the 4 shared-prime patterns compatible with a k=6 group-form counterexample's pairwise-gcd constraints (realizability by an actual group is NOT decided by this search - see result.md)",
+     "minimal_part": "((2,), (2,), (2,), (2,), (2, 3), (2, 5))",
+     "minimality_proof": "The D-tuple itself is the object being classified; each of the 6 entries and all 15 pairwise intersections are needed to state |D_i cap D_j|=1 for every pair, so no proper sub-tuple determines membership in this pattern."
+    }
+   ],
+   "finished": true,
+   "wall_s": 0.058,
+   "n_valid_tuples": 147,
+   "n_survivors": 4,
+   "n_undecided": 0,
+   "certified": true
+  }
+ ],
+ "certified_sizes": [
+  6
+ ],
+ "total_wall_s": 0.058,
+ "script_sha256": "3a081e5f7a6f4292cf87fe578ff547962b9668bcb379463df1683397393db00f",
+ "python": "3.14.6",
+ "platform": "macOS-26.2-arm64-arm-64bit-Mach-O"
+}
