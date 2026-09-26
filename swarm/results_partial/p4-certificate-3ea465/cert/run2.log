@@ -1,0 +1,4 @@
+k=21: UNFINISHED, nodes reached=7600000
+k=22: UNFINISHED, nodes reached=6516000
+k=23: UNFINISHED, nodes reached=8048000
+{"certified_sizes": [], "nodes": {"21": 7600000, "22": 6516000, "23": 8048000}, "total_wall_s": 75.013}

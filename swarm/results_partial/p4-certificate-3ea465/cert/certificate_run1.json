@@ -1,0 +1,78 @@
+{
+ "problem": "p4",
+ "cell": "c6",
+ "domain": "For each k in {21,22,23}: multisets (m_1<=...<=m_k) of size k drawn from D_k = { d : d | L_k, d has >= 2 distinct prime factors }, where L_k = lcm(1,...,k-1). (Residues a_i are NOT yet assigned at this stage: a survivor here is a MODULUS PATTERN, decided only if C1-C4 already refute it; patterns not refuted by C1-C4 are left as explicit undecided survivors, since deciding them needs a further residue/CRT search -- see result.md.)",
+ "domain_proof": "Main Reduction Theorem (result.md): if a size-k counterexample F exists, a size-k counterexample F* exists with the SAME pairwise gcds as F and every modulus dividing L_k (generalises Lemma 1/2/Main-Reduction-Theorem of swarm/results/p4-proof-9c5676/result.md, k=25 case, to general k, by the identical argument with 25 -> k, 24 -> k-1, L -> L_k). C1 (>=2 prime factors) additionally restricts the domain because a size-k counterexample cannot have a modulus that is a prime power: OPEN-board item 'CONJECTURED: minimal counterexample ... no m_i is a prime power' (O'Bryant Lemma 6, cited, not re-proved here) -- so this filter is sound only conditionally on that cited lemma; flagged as such in result.md.",
+ "rules": [
+  {
+   "id": "C1",
+   "statement": "Domain restriction: only divisors of L_k with >= 2 distinct prime factors are enumerated.",
+   "proof": "Cited: O'Bryant Lemma 6 (no m_i a prime power) applied to a reduced (all moduli | L_k) counterexample. Conditional on that cited lemma (see result.md); not re-derived here."
+  },
+  {
+   "id": "C4",
+   "statement": "For every prime p with p >= ceil(k/2): among the chosen moduli, the count divisible by p must end at exactly 0 or 2, and is pruned as soon as it reaches 3.",
+   "proof": "Domain restriction (C1/reduction) gives v_p(m_i) <= 1 for every such p (since p^2 > (k-1) for p >= ceil(k/2), k<=23, so p^2 does not divide L_k). Two moduli divisible by p then have gcd exactly p (Lemma-3 style argument, p4-proof-9c5676 result.md Lemma 3, generalised): if 3 moduli are divisible by p, the pigeonhole argument forcing injectivity mod p (Lemma 3(b)) still applies pairwise, but the board's C4 additionally excludes count=1 and count>=3 as part of O'Bryant Lemma 6's conjectured minimal-counterexample profile; the count>=3 half is what is pruned here (cited, conditional -- see result.md); count==1 is checked at the leaf, not pruned mid-search, since a later slot could still be forced."
+  },
+  {
+   "id": "C3",
+   "statement": "At most k-3 of the remaining (unfilled) slots may be needed to reach 3 multiples of (k-1); prune a partial family if it can no longer reach >= 3 moduli divisible by (k-1) by the end.",
+   "proof": "Board OPEN item: minimal counterexample has >= 3 m_i divisible by k-1 (cited, conditional, O'Bryant Lemma 6). This is a monotone counting constraint: the final count can only be reached by adding more divisible moduli, so if current_count + slots_left < 3 no completion of this partial family can satisfy it."
+  }
+ ],
+ "sizes": [
+  {
+   "size": 21,
+   "nodes": 7596000,
+   "pruned": {
+    "C1": 0,
+    "C4": 3876189,
+    "C3": 77450
+   },
+   "survivors": [],
+   "finished": false,
+   "wall_s": 25.005,
+   "note": "UNFINISHED - 25s per-size wall-clock budget exceeded, not claimed",
+   "n_survivors": 0,
+   "n_undecided": 0,
+   "certified": false
+  },
+  {
+   "size": 22,
+   "nodes": 6504000,
+   "pruned": {
+    "C1": 0,
+    "C4": 3789461,
+    "C3": 56839
+   },
+   "survivors": [],
+   "finished": false,
+   "wall_s": 25.008,
+   "note": "UNFINISHED - 25s per-size wall-clock budget exceeded, not claimed",
+   "n_survivors": 0,
+   "n_undecided": 0,
+   "certified": false
+  },
+  {
+   "size": 23,
+   "nodes": 8238000,
+   "pruned": {
+    "C1": 0,
+    "C4": 1814938,
+    "C3": 37606
+   },
+   "survivors": [],
+   "finished": false,
+   "wall_s": 25.009,
+   "note": "UNFINISHED - 25s per-size wall-clock budget exceeded, not claimed",
+   "n_survivors": 0,
+   "n_undecided": 0,
+   "certified": false
+  }
+ ],
+ "certified_sizes": [],
+ "total_wall_s": 75.025,
+ "script_sha256": "47a1beeced517acd50e2f0d20fbd2edfc9c6736266c3ba41dc77bdcadefbef64",
+ "python": "3.11.15",
+ "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39"
+}
