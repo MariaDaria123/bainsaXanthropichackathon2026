@@ -1,0 +1,11 @@
+{
+ "id": "p4-pattern-20e03c",
+ "problem": "p4",
+ "cell": "c6",
+ "track": "pattern",
+ "goal": "(c) Refine the 4-pattern classification by also tracking the exponent of the shared prime 2 (v_2=1 giving gcd 2, vs v_2>=2 giving gcd 4) to get a finer necessary condition for realizability, and check whether any refinement is incompatible with known small-group coset structures.",
+ "prio": 2,
+ "parent": "p4-proof-f59824",
+ "created_by": "cloud-2",
+ "created": "2026-09-26T15:24:52"
+}
