@@ -1,0 +1,27 @@
+{
+ "problem": "p4",
+ "cell": "c6",
+ "domain": "integers 1..24 (for L) and 2..23 (for primes <= 23); fixed numeric facts, no search",
+ "domain_proof": "L = lcm(1..24) is by definition determined by 1..24; primes <= 23 lie in 2..23. Every fact is also proved by hand in result.md (Setup); this run is a cross-check.",
+ "rules": [],
+ "sizes": [
+  {
+   "size": "numeric-facts-for-k25-reduction (NOT a decision of k=25)",
+   "nodes": 24,
+   "pruned": {},
+   "survivors": [],
+   "finished": true,
+   "wall_s": 0.0,
+   "n_survivors": 0,
+   "n_undecided": 0,
+   "certified": true
+  }
+ ],
+ "certified_sizes": [
+  "numeric-facts-for-k25-reduction (NOT a decision of k=25)"
+ ],
+ "total_wall_s": 0.0,
+ "script_sha256": "0a01d40c6c5b3f487ed5b3d88a23cd9a4c3d5c954902772b48f7668be2e0f0b9",
+ "python": "3.14.6",
+ "platform": "macOS-26.2-arm64-arm-64bit-Mach-O"
+}
