@@ -1,5 +1,8 @@
 mpmath
 sympy
 numpy
+scipy
 ortools
 python-sat
+z3-solver
+python-flint

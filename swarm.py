@@ -172,12 +172,24 @@ def findings(problem=None):
     return sorted(out, key=lambda r: r.get("t", ""))
 
 
-def board_text(problem, limit=60):
+STRONG = {"proved", "bounded", "computed"}
+FAILED = {"refuted", "dead_end"}
+
+
+def board_text(problem, limit=80):
+    """Board split the kit's way: FACTS (accepted twice), FAILED (never repeat), OPEN (attack these)."""
     rows = findings(problem)[-limit:]
     if not rows:
         return "(board is empty for this problem)"
-    return "\n".join(f"- [{r.get('type','?')}/{r.get('status','?')}] {r.get('statement','')} "
-                     f"(evidence: {r.get('evidence','')}; by {r.get('worker','?')}, task {r.get('task','?')})" for r in rows)
+    fmt = lambda r: (f"- [{r.get('status','?').upper()}] {r.get('statement','')} "
+                     f"(evidence: {r.get('evidence','')}; {r.get('worker','?')}/{r.get('task','?')}"
+                     + (f"; critics: {r['critic']}" if r.get('critic') else "") + ")")
+    facts = [fmt(r) for r in rows if r.get("status") in STRONG and r.get("type") != "new_task"]
+    failed = [fmt(r) for r in rows if r.get("status") in FAILED]
+    opn = [fmt(r) for r in rows if r.get("status") not in STRONG | FAILED and r.get("type") != "new_task"]
+    return ("FACTS (passed 2 blind critics; use as lemmas):\n" + ("\n".join(facts) or "- none yet")
+            + "\n\nFAILED (never retry without saying what is new):\n" + ("\n".join(failed) or "- none yet")
+            + "\n\nOPEN (conjectures / observations / data to build on or attack):\n" + ("\n".join(opn) or "- none yet"))
 
 
 def reclaim_stale(stale_min):
@@ -223,10 +235,15 @@ def cell_text(t):
     return open(p).read().strip() if os.path.exists(p) else "(cell.md missing)"
 
 
-def build_prompt(t, name, resdir):
+def agent_body(name):
+    txt = open(os.path.join(ROOT, ".claude", "agents", f"{name}.md")).read()
+    return re.sub(r"^---\n.*?\n---\n", "", txt, flags=re.S)
+
+
+def build_prompt(t, name, resdir, task_min):
     rel = os.path.relpath(resdir, ROOT)
-    return f"""You are swarm worker {name}, one of several Claude agents on different laptops attacking the OPEN cell c6 of problem {t['problem']} together.
-Working directory: the repo root. Read CLAUDE.md and problems/{t['problem']}/problem.md first. Use problems/{t['problem']}/lib/.
+    return f"""You are swarm worker {name}: the AUTHOR for one task, one of many Claude agents on 4 laptops attacking the OPEN cell c6 of problem {t['problem']} together.
+Working directory: the repo root. First read CLAUDE-cell-6-open.md (your rules), then problems/{t['problem']}/problem.md. Use problems/{t['problem']}/lib/.
 
 THE CELL (exact statement):
 {cell_text(t)}
@@ -236,56 +253,124 @@ YOUR TASK ({t['track']} track, id {t['id']}):
 
 TRACK RULES: {TRACK_BRIEF.get(t['track'], '')}
 
-SHARED BOARD (findings from all workers so far; statuses: proved / computed / conjecture / refuted / dead_end):
+SHARED BOARD (all workers, all laptops):
 {board_text(t['problem'])}
 
-Global rules:
-- Say exactly what you established. A pattern checked for n<=70 is 'computed', not 'proved'. An unfinished search is not a verification.
-- Exact arithmetic (int/Fraction) or interval arithmetic for anything you claim. Any code must run < 10 minutes.
-- Do not redo work the board already has. Build on 'proved' items; attack 'conjecture' items.
-- Time box: {os.environ.get('SWARM_TASK_MIN', '35')} minutes. Stop earlier with a partial result rather than run over.
-- Write ONLY inside {rel}/ .
+AUTHOR METHOD:
+{agent_body('author')}
+
+Hard limits:
+- Time box: {task_min} minutes, then this session is killed. Run `date` now. Write result.md and findings.jsonl EARLY and update them; a killed session with no files scores nothing.
+- Exact arithmetic (int/Fraction) or interval arithmetic for any claim. Code must run < 10 minutes.
+- Write ONLY inside {rel}/ (scripts, data, result.md, notes.md, findings.jsonl).
+- After you finish, TWO blind critics will referee {rel}/result.md. Any [PROVED]/[BOUNDED]/[COMPUTED] claim they do not both ACCEPT is automatically downgraded to [CONJECTURED]. So claim only what you can defend line by line.
 
 Deliverables (both required):
-1. {rel}/result.md — what you did, the exact claim, proof or evidence, code paths, what is NOT established.
-2. {rel}/findings.jsonl — one JSON object per line, each:
+1. {rel}/result.md in the Format A of CLAUDE-cell-6-open.md; every claim labelled.
+2. {rel}/findings.jsonl, one JSON object per line:
    {{"type": "lemma|bound|formula|construction|counterexample|data|dead_end|obstruction|new_task",
-     "statement": "exact statement", "status": "proved|computed|conjecture|refuted|dead_end",
-     "evidence": "file path or one-line justification", "track": "suggested track (only for new_task)", "prio": 1-3 (only for new_task)}}
-   Use new_task lines to propose the most promising next tasks (max 3). Always include at least one line.
+     "statement": "exact statement", "status": "proved|bounded|computed|conjectured|observed|refuted|dead_end",
+     "evidence": "file path or one-line justification", "track": "(new_task only) {'|'.join(TRACKS)}", "prio": "(new_task only) 1-3"}}
+   Status must match the label in result.md. Propose up to 3 new_task lines (the most promising next steps, or the
+   lower-ambition fallback after a failure). Always include at least one line.
 """
 
 
-def run_agent(prompt, timeout_min):
+def critic_prompt(t, resdir, k):
+    rel = os.path.relpath(resdir, ROOT)
+    cell = os.path.relpath(os.path.join(ROOT, "problems", t["problem"], "cells", t.get("cell", "c6"), "cell.md"), ROOT)
+    body = agent_body("critic").replace("{RESULT}", rel).replace("{CELL_MD}", cell)
+    return (f"You are blind critic #{k} for swarm task {t['id']}. Working directory: the repo root.\n"
+            f"Task goal: {t['goal']}\n\n{body}\n\nWrite your full report to {rel}/critic_{k}.md "
+            f"(ending with the VERDICT line) and also print it.")
+
+
+def run_agent(prompt, timeout_min, tools="Read,Write,Edit,Bash,Glob,Grep,WebSearch,WebFetch"):
     cmd = os.environ.get("SWARM_AGENT_CMD")
     if cmd:                                          # test / alternative agent hook
         p = subprocess.run(cmd, shell=True, input=prompt, cwd=ROOT, capture_output=True, text=True, timeout=timeout_min * 60)
-        return p.returncode == 0, p.stdout[-2000:]
-    args = ["claude", "-p", prompt, "--output-format", "json"]
+        return p.returncode == 0, p.stdout[-4000:]
+    args = ["claude", "-p", prompt, "--output-format", "text"]
     if os.environ.get("SWARM_MODEL"):
         args += ["--model", os.environ["SWARM_MODEL"]]
     if os.environ.get("SWARM_YOLO") == "1":
         args += ["--dangerously-skip-permissions"]
     else:
-        args += ["--permission-mode", "acceptEdits", "--allowedTools", "Read,Write,Edit,Bash,Glob,Grep,WebSearch,WebFetch"]
+        args += ["--permission-mode", "acceptEdits", "--allowedTools", tools]
     try:
         p = subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=timeout_min * 60)
-        return p.returncode == 0, p.stdout[-2000:]
+        return p.returncode == 0, p.stdout[-4000:]
     except subprocess.TimeoutExpired:
         return False, "TIMEOUT"
 
 
-def finish(t, name, ok, secs, tail):
-    resdir = os.path.join(D_RESULTS, t["id"])
-    os.makedirs(resdir, exist_ok=True)
-    found = []
-    fpath = os.path.join(resdir, "findings.jsonl")
+def verdict_of(text):
+    m = re.findall(r"VERDICT:\s*(ACCEPT|MINOR|RESTART)", text or "")
+    return m[-1] if m else "NONE"
+
+
+def read_findings(resdir):
+    out, fpath = [], os.path.join(resdir, "findings.jsonl")
     if os.path.exists(fpath):
         for line in open(fpath):
             try:
-                found.append(json.loads(line))
+                out.append(json.loads(line))
             except json.JSONDecodeError:
                 pass
+    return out
+
+
+def critic_gate(t, resdir, crit_min, fix_min, log=print):
+    """Kit rule, enforced mechanically: strong claims need VERDICT: ACCEPT from two blind critics
+    (parallel, fresh sessions). MINOR -> one author fix round, then re-review. Returns (verdicts, summary)."""
+    from concurrent.futures import ThreadPoolExecutor
+    rounds = []
+    for rnd in (1, 2):
+        with ThreadPoolExecutor(2) as ex:
+            res = list(ex.map(lambda k: run_agent(critic_prompt(t, resdir, k), crit_min, "Read,Bash,Glob,Grep"), (1, 2)))
+        vs = []
+        for k, (ok, out) in zip((1, 2), res):
+            f = os.path.join(resdir, f"critic_{k}.md")
+            txt = open(f).read() if os.path.exists(f) else out
+            if not os.path.exists(f):
+                open(f, "w").write(out)
+            os.replace(f, os.path.join(resdir, f"critic_{k}_round{rnd}.md"))
+            vs.append(verdict_of(txt))
+        rounds.append(vs)
+        log(f"critics round {rnd}: {vs}")
+        if vs == ["ACCEPT", "ACCEPT"] or "RESTART" in vs or rnd == 2:
+            break
+        # MINOR (or a missing verdict): one author fix round, same approach
+        rel = os.path.relpath(resdir, ROOT)
+        run_agent(f"You are the AUTHOR of {rel}/result.md for swarm task {t['id']} ({t['goal']}). Two blind critics reviewed it; "
+                  f"their reports are {rel}/critic_1_round1.md and {rel}/critic_2_round1.md. Fix EVERY listed point, keep the "
+                  f"approach, update result.md and findings.jsonl (downgrade any label you cannot defend). You have {fix_min} minutes. "
+                  f"Write only inside {rel}/.\n\n{agent_body('author')}", fix_min)
+    final = rounds[-1]
+    return final, f"{'/'.join(final)} (round {len(rounds)})"
+
+
+def finish(t, name, ok, secs, tail, verdicts=None, vsummary=None):
+    resdir = os.path.join(D_RESULTS, t["id"])
+    os.makedirs(resdir, exist_ok=True)
+    found = read_findings(resdir)
+    accepted = verdicts == ["ACCEPT", "ACCEPT"]
+    for r in found:                                  # fail-closed: no double ACCEPT -> no strong label
+        r["status"] = {"conjecture": "conjectured"}.get(r.get("status"), r.get("status"))
+        if r.get("status") in STRONG:
+            if accepted:
+                r["critic"] = vsummary
+            else:
+                r["claimed_status"], r["status"] = r["status"], "conjectured"
+                r["critic"] = f"downgraded: {vsummary or 'not reviewed'}"
+    if verdicts and "RESTART" in verdicts:
+        reason = ""
+        for f in sorted(glob.glob(os.path.join(resdir, "critic_*_round*.md"))):
+            m = re.search(r"REASON:\s*(.+)", open(f).read())
+            if m:
+                reason = m.group(1).strip()[:300]; break
+        found.append({"type": "dead_end", "status": "dead_end", "statement": f"critic RESTART on approach of {t['id']}: {reason or 'see critic reports'}",
+                      "evidence": os.path.relpath(resdir, ROOT)})
     if not found:
         found = [{"type": "dead_end", "statement": f"task {t['id']} produced no findings ({'timeout/error' if not ok else 'empty'})",
                   "status": "dead_end", "evidence": tail[-200:]}]
@@ -300,7 +385,7 @@ def finish(t, name, ok, secs, tail):
                 new_tasks.append(add_task(t["problem"], r["track"], goal, int(r.get("prio", 2)),
                                           parent=t["id"], by=name, push=False))
             b.write(json.dumps(r) + "\n")
-    t.update(finished_at=now(), seconds=round(secs), ok=ok, n_findings=len(found), spawned=new_tasks)
+    t.update(finished_at=now(), seconds=round(secs), ok=ok, n_findings=len(found), spawned=new_tasks, critics=vsummary)
     claimed = os.path.join(D_CLAIMED, t["id"] + ".json")
     if os.path.exists(claimed):
         os.remove(claimed)
@@ -350,8 +435,12 @@ def work(a):
         os.makedirs(resdir, exist_ok=True)
         print(f"[{a.name}] {now()} working {t['id']}: {t['goal'][:90]}")
         t0 = time.time()
-        ok, tail = run_agent(build_prompt(t, a.name, resdir), a.task_min)
-        found, new = finish(t, a.name, ok, time.time() - t0, tail)
+        ok, tail = run_agent(build_prompt(t, a.name, resdir, a.task_min), a.task_min)
+        verdicts = vsummary = None
+        if any(r.get("status") in STRONG for r in read_findings(resdir)) and os.path.exists(os.path.join(resdir, "result.md")):
+            print(f"[{a.name}] strong claim -> 2 blind critics")
+            verdicts, vsummary = critic_gate(t, resdir, a.critic_min, a.fix_min, log=lambda m: print(f"[{a.name}] {m}"))
+        found, new = finish(t, a.name, ok, time.time() - t0, tail, verdicts, vsummary)
         print(f"[{a.name}] done {t['id']} in {(time.time()-t0)/60:.1f} min: {len(found)} findings, {len(new)} new tasks")
         if a.once:
             return
@@ -366,7 +455,7 @@ def status(a):
           + ("   ** STOP set **" if os.path.exists(os.path.join(SW, 'STOP')) else ""))
     for p in ["p1", "p2", "p3", "p4"]:
         fp = [r for r in F if r.get("problem") == p]
-        by = {s: sum(1 for r in fp if r.get("status") == s) for s in ["proved", "computed", "conjecture", "refuted", "dead_end"]}
+        by = {s: sum(1 for r in fp if r.get("status") == s) for s in ["proved", "bounded", "computed", "conjectured", "observed", "refuted", "dead_end"]}
         print(f"  {p}: open {sum(t['problem']==p for t in o)}  running {sum(t['problem']==p for t in c)}  "
               f"done {sum(t['problem']==p for t in d)}  | " + "  ".join(f"{k} {v}" for k, v in by.items()))
     if c:
@@ -385,8 +474,9 @@ def main():
     s.add_argument("--track", choices=TRACKS, default="proof"); s.add_argument("--prio", type=int, default=2)
     sd = sub.add_parser("seed"); sd.add_argument("set", nargs="?", default="all", choices=["all", "p4c6"])
     w = sub.add_parser("work"); w.add_argument("--name", required=True); w.add_argument("--problem")
-    w.add_argument("--tracks"); w.add_argument("--task-min", type=int, default=40)
-    w.add_argument("--stale-min", type=int, default=55); w.add_argument("--poll", type=int, default=20)
+    w.add_argument("--tracks"); w.add_argument("--task-min", type=int, default=int(os.environ.get("SWARM_TASK_MIN", 25)))
+    w.add_argument("--critic-min", type=int, default=8); w.add_argument("--fix-min", type=int, default=8)
+    w.add_argument("--stale-min", type=int, default=75); w.add_argument("--poll", type=int, default=20)
     w.add_argument("--max-idle", type=int, default=90); w.add_argument("--once", action="store_true")
     w.add_argument("--match", help='only claim tasks whose goal contains this text, e.g. "(a)"')
     w.add_argument("--no-clone", action="store_true", help="work in this checkout instead of ~/swarm-workers/<name>")

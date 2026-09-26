@@ -2,3 +2,4 @@ __pycache__/
 .quarantine/
 **/cert/rerun_certificate.json
 *.pyc
+.venv/
